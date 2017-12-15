@@ -90,7 +90,7 @@ function getMainComment(kind: InfoKind, user: string): Comment | undefined {
         case InfoKind.HasMergeConflict:
             return { tag: "complaint", status: `@${user} Unfortunately, this pull request currently has a merge conflict 😥. Please update your PR branch to be up-to-date with respect to master. Have a nice day!` };
         case InfoKind.NeedsRevision:
-            return { tag: "complaint", status: `@${user} One or more reviewers has requested changes. Please address their comments. I'll be back once they sign off or you've pushed new comments. Thank you!` };
+            return { tag: "complaint", status: `@${user} One or more reviewers has requested changes. Please address their comments. I'll be back once they sign off or you've pushed new commits. Thank you!` };
         case InfoKind.MergeExpress:
             return {
                 tag: "merge",
