@@ -1,6 +1,6 @@
 const r = require('request');
 
-const authToken = process.env['AUTH_TOKEN'];
+const authToken = process.env["DT_BOT_AUTH_TOKEN"] || process.env["BOT_AUTH_TOKEN"] || process.env["AUTH_TOKEN"];
 if (authToken === undefined) {
     throw new Error("Must set AUTH_TOKEN environment variable");
 }

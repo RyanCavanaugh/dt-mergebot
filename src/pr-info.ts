@@ -481,7 +481,6 @@ function analyzeReviews(prInfo: PR_repository_pullRequest, isOwner: (name: strin
     }
 
     return ({
-
         reviewersWithStaleReviews,
         approvalFlags,
         isChangesRequested

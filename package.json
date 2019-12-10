@@ -21,7 +21,8 @@
     "tslib": "^1.10.0",
     "typescript": "^3.7.0-dev.20191003",
     "idembot": "^0.0.12",
-    "chalk": "^3.0.0"
+    "chalk": "3.0.0",
+    "moment": "2.24.0"
   },
   "scripts": {
     "prepublishOnly": "npm run build",
