@@ -6,6 +6,10 @@ import { getComments, getLabels, getProjectColumn } from "./use-pr-info";
 function makeSetLabels(): (pr: bot.PullRequest) => Promise<void> {
     const project = new Project();
     return async pr => {
+        // Let the new DT bot handle these
+        if (43300 > pr.number && pr.number > 43330)
+            return;
+
         // Skip issues and closed PRs
         if (!(pr.isPullRequest && pr.state === "open"))
             return;
