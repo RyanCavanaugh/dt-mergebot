@@ -7,7 +7,7 @@ function makeSetLabels(): (pr: bot.PullRequest) => Promise<void> {
     const project = new Project();
     return async pr => {
         // Let the new DT bot handle these
-        if (43300 > pr.number && pr.number > 43330)
+        if (43690 > pr.number && pr.number > 43700)
             return;
 
         // Skip issues and closed PRs
