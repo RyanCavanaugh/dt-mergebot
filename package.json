@@ -2,13 +2,16 @@
   "name": "dt-mergebot",
   "version": "1.0.10",
   "description": "dt-mergebot",
-  "main": "index.js",
   "dependencies": {
+    "@azure/functions": "^1.0.2-beta2",
     "@graphql-codegen/fragment-matcher": "^1.8.1",
     "@octokit/graphql-schema": "^6.45.0",
+    "@octokit/webhooks": "^6.3.2",
     "@types/node": "latest",
     "@types/node-fetch": "^1.6.7",
     "@types/request": "^2.0.9",
+    "@types/prettyjson": "^0.0.29",
+    "@types/jest": "25.1.4",
     "apollo-boost": "^0.4.4",
     "definitelytyped-header-parser": "github:Microsoft/definitelytyped-header-parser#production",
     "fs-extra": "^4.0.3",
@@ -18,17 +21,24 @@
     "node-fetch": "^1.7.3",
     "request": "^2.83.0",
     "tslib": "^1.10.0",
-    "typescript": "^3.7.4"
+    "typescript": "^3.7.0-dev.20191003",
+    "idembot": "^0.0.12",
+    "chalk": "^3.0.0",
+    "prettyjson": "^1.2.1"
   },
   "scripts": {
     "prepublishOnly": "npm run build",
     "build": "tsc",
     "watch": "tsc --watch",
-    "single": "npm run build && node bin/process-single.js",
-    "single-info": "npm run build && node bin/show-info.js",
-    "single-info-debug": "npm run build && node --inspect-brk bin/show-info.js",
-    "cleanproject": "npm run build && node bin/clean-columns.js",
-    "graphql-schema": "npx apollo client:codegen schema --target typescript --globalTypesFile=src/schema/graphql-global-types.ts"
+    "single": "npm run build && node bin/commands/process-single.js",
+    "single-info": "npm run build && node bin/commands/show-info.js",
+    "single-info-debug": "npm run build && node --inspect-brk bin/commands/show-info.js",
+    "start": "func start",
+    "deploy": "func azure functionapp publish TypeScriptReposAutomation",
+    "cleanproject": "npm run build && node bin/commands/clean-columns.js",
+    "create-fixture": "npm run build && node bin/commands/create-fixture.js",
+    "graphql-schema": "npx apollo client:codegen schema --target typescript --globalTypesFile=src/schema/graphql-global-types.ts",
+    "test": " jest"
   },
   "repository": {
     "type": "git",
@@ -41,6 +51,17 @@
   },
   "homepage": "https://github.com/RyanCavanaugh/dt-mergebot#readme",
   "devDependencies": {
-    "apollo": "^2.18.3"
+    "apollo": "^2.18.3",
+    "jest": "25.1.0",
+    "ts-jest": "25.2.1",
+    "jest-file-snapshot": "^0.3.8"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/bin"
+    ]
   }
 }

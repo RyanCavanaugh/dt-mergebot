@@ -37,6 +37,7 @@ export const DefaultActions = {
 export function process(info: PrInfo): Actions {
     const context = {
         ...DefaultActions,
+        responseComments: [] as Comments.Comment[],
         pr_number: info.pr_number
      };
 
@@ -169,7 +170,7 @@ function daysStaleBetween(lowerBoundInclusive: number, upperBoundExclusive: numb
 
 function createWelcomeComment(info: PrInfo) {
     const otherOwners = info.owners.filter(a => a.toLowerCase() !== info.author.toLowerCase());
-    const signoffParty = (needsMaintainerApproval(info) || otherOwners.length === 0) ? "a maintainer" : "an owner or maintainer";
+    const signoffParty = (needsMaintainerApproval(info) || otherOwners.length === 0) ? "a DT maintainer" : "an owner or DT maintainer";
 
     const specialWelcome = info.isFirstContribution ? ` I see this is your first time submitting to DefinitelyTyped 👋 - keep an eye on this comment as I'll be updating it with information as things progress.` : ""
     const introCommentLines: string[] = [];
@@ -181,23 +182,26 @@ function createWelcomeComment(info: PrInfo) {
     // Some kind of extra warning
     let dangerComment: string | undefined;
     if (info.anyPackageIsNew) {
-        reviewerAdvisory = "This PR adds a new definition, so it needs to be reviewed by a maintainer before it can be merged.";
+        const links = info.packages.map(p => `- [${p}](https://www.npmjs.com/package/${p})`).join("\n")
+
+        reviewerAdvisory = `This PR adds a new definition, so it needs to be reviewed by a DT maintainer before it can be merged.\n\n${links}`;
+         
     } else if (info.popularityLevel !== "Well-liked by everyone") {
-        reviewerAdvisory = "Because this is a widely-used package, a maintainer will need to review it before it can be merged.";
+        reviewerAdvisory = "Because this is a widely-used package, a DT maintainer will need to review it before it can be merged.";
     } else if (info.dangerLevel === "ScopedAndTested") {
         reviewerAdvisory = "Because you edited one package and updated the tests (👏), I can merge this once someone else signs off on it.";
     } else if (otherOwners.length === 0) {
-        reviewerAdvisory = "There aren't any other owners of this package, so a maintainer will review it.";
+        reviewerAdvisory = "There aren't any other owners of this package, so a DT maintainer will review it.";
     } else if (info.dangerLevel === "MultiplePackagesEdited") {
-        reviewerAdvisory = "Because this PR edits multiple packages, it can be merged once it's reviewed by a maintainer."
+        reviewerAdvisory = "Because this PR edits multiple packages, it can be merged once it's reviewed by a DT maintainer."
     } else if (info.dangerLevel === "ScopedAndConfiguration") {
-        reviewerAdvisory = "Because this PR edits the configuration file, it can be merged once it's reviewed by a maintainer."
+        reviewerAdvisory = "Because this PR edits the configuration file, it can be merged once it's reviewed by a DT maintainer."
     } else {
-        reviewerAdvisory = "This PR can be merged once it's reviewed by a maintainer."
+        reviewerAdvisory = "This PR can be merged once it's reviewed by a DT maintainer."
     }
     
     if (info.dangerLevel === "ScopedAndUntested") {
-        dangerComment = "This PR doesn't modify any tests, so it's hard to know what's being fixed, and your changes might regress in the future. Have you considered adding tests to cover the change you're making?";
+        dangerComment = "This PR doesn't modify any tests, so it's hard to know what's being fixed, and your changes might regress in the future. Have you considered adding tests to cover the change you're making? Including tests allows this PR to be merged by yourself and the owners of this module.";
     } else if (info.dangerLevel === "Infrastructure") {
         dangerComment = "This PR touches some part of DefinitelyTyped infrastructure, so a maintainer will need to review it. This is rare - did you mean to do this?";
     }
@@ -220,12 +224,18 @@ function createWelcomeComment(info: PrInfo) {
     introCommentLines.push(``);
     introCommentLines.push(` * ${emoji(!info.hasMergeConflict)} No merge conflicts`);
     introCommentLines.push(` * ${emoji(info.travisResult === TravisResult.Pass)} Continuous integration tests have passed`);
-    introCommentLines.push(` * ${emoji(hasFinalApproval(info))} Most recent commit is approved by ${signoffParty}`);
+    if (info.dangerLevel === "ScopedAndTested") {
+        introCommentLines.push(` * ${emoji(hasFinalApproval(info))} Most recent commit is approved by ${signoffParty}`);
+    } else if(info.anyPackageIsNew) { 
+        introCommentLines.push(` * ${emoji(hasFinalApproval(info))} Only a DT maintainer can merge changes when there are new packages added`);
+    } else {
+        introCommentLines.push(` * ${emoji(hasFinalApproval(info))} Only a DT maintainer can merge changes without tests`);
+    }
     introCommentLines.push(``);
     introCommentLines.push(`Once every item on this list is checked, I'll ask you for permission to merge and publish the changes.`)
     introCommentLines.push(``);
     introCommentLines.push(`----------------------`);
-    introCommentLines.push(`<details><summary>Diagnostic Information: What the bot saw about this PR</summary>\n\n${'```\n' + JSON.stringify(info, undefined, 2) + '\n```'}\n\n</details>`);
+    introCommentLines.push(`<details><summary>Diagnostic Information: What the bot saw about this PR</summary>\n\n${'```json\n' + JSON.stringify(info, undefined, 2) + '\n```'}\n\n</details>`);
 
     return introCommentLines.join("\n");
 
